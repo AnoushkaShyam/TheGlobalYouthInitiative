@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Global Opportunity Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1A1814;
+    --text-muted: #6B6660;
+    --text-faint: #A09990;
+    --accent: #1E4D3B;
+    --accent-light: #E8F3EE;
+    --accent2: #8B3A1E;
+    --accent2-light: #FAF0EB;
+    --tag-interest-bg: #EBF3FF; --tag-interest-fg: #1A3A6B;
+    --tag-mode-bg: #E8F3EE; --tag-mode-fg: #1E4D3B;
+    --tag-loc-bg: #EDE8FA; --tag-loc-fg: #3A1E6B;
+    --tag-age-bg: #FFF4E5; --tag-age-fg: #6B3D00;
+    --tag-elig-bg: #FCE8EF; --tag-elig-fg: #6B1A35;
+    --tag-dead-bg: #FFF0E8; --tag-dead-fg: #6B2A00;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --shadow-hover: 0 6px 24px rgba(0,0,0,0.13);
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .site-header {
+    background: var(--accent);
+    color: white;
+    padding: 3.5rem 2rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+  .header-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+  .header-title em { font-style: italic; color: rgba(255,255,255,0.75); }
+  .header-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    max-width: 520px;
+    line-height: 1.6;
+  }
+  .header-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 1.25rem;
+    font-weight: 500;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: #7DDBB3; }
+
+  /* Main layout */
+  .main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+  /* Filter panel */
+  .filter-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .filter-panel-label {
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+  .filter-row:last-child { margin-bottom: 0; }
+  .filter-search {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .filter-search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(30,77,59,0.1);
+  }
+  .filter-search::placeholder { color: var(--text-faint); }
+  select.fsel {
+    padding: 9px 32px 9px 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E") no-repeat right 10px center;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select.fsel:focus { border-color: var(--accent); }
+  .btn-reset {
+    padding: 9px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .btn-reset:hover { background: var(--surface2); color: var(--text); }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .stats-count {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .stats-count strong { color: var(--text); font-weight: 600; }
+  .sort-label { font-size: 13px; color: var(--text-faint); margin-left: auto; }
+  .sort-tabs { display: flex; gap: 4px; }
+  .sort-tab {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .sort-tab.active, .sort-tab:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Active filters */
+  .active-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+  .active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: var(--accent-light);
+    border: 1px solid rgba(30,77,59,0.2);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .active-chip .x { font-size: 14px; line-height: 1; opacity: 0.6; }
+  .active-chip:hover .x { opacity: 1; }
+
+  /* Grid */
+  .opp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  .opp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    animation: fadeIn 0.25s ease both;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .opp-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+  }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .card-name {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+  }
+  .card-arrow {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: var(--text-faint);
+    transition: background 0.15s, color 0.15s;
+    margin-top: 1px;
+  }
+  .opp-card:hover .card-arrow { background: var(--accent); color: white; }
+  .card-url {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .ti { background: var(--tag-interest-bg); color: var(--tag-interest-fg); }
+  .tm { background: var(--tag-mode-bg); color: var(--tag-mode-fg); }
+  .tl { background: var(--tag-loc-bg); color: var(--tag-loc-fg); }
+  .ta { background: var(--tag-age-bg); color: var(--tag-age-fg); }
+  .te { background: var(--tag-elig-bg); color: var(--tag-elig-fg); }
+  .td { background: var(--tag-dead-bg); color: var(--tag-dead-fg); }
+
+  /* Empty state */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3; }
+  .empty h3 { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
+  .empty p { font-size: 14px; }
+
+  /* Footer */
+  .site-footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-faint);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  @media (max-width: 600px) {
+    .main { padding: 1rem; }
+    .site-header { padding: 2rem 1rem 1.75rem; }
+    .filter-row { flex-direction: column; }
+    select.fsel { width: 100%; }
+    .opp-grid { grid-template-columns: 1fr; }
+    .sort-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-eyebrow">Youth &amp; Student Opportunities</div>
+    <h1 class="header-title">The Global<br><em>Opportunity</em> Database</h1>
+    <p class="header-sub">130+ curated programs — research, scholarships, competitions, internships, exchanges, and more — filtered for you.</p>
+    <div class="header-count"><span class="dot"></span><span id="total-count">130</span> opportunities indexed</div>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="filter-panel">
+    <div class="filter-panel-label">Filter &amp; Search</div>
+    <div class="filter-row">
+      <input type="text" class="filter-search" id="search" placeholder="Search by name, category, or keyword..." oninput="render()" />
+      <button class="btn-reset" onclick="resetFilters()">Clear all</button>
+    </div>
+    <div class="filter-row">
+      <select class="fsel" id="f-interest" onchange="render()">
+        <option value="">All interests</option>
+        <option>STEM + Research</option>
+        <option>Business + Finance</option>
+        <option>Law + Policy + IR</option>
+        <option>Arts + Design</option>
+        <option>Medicine + Health</option>
+        <option>Tech + AI</option>
+        <option>Social Impact + NGO</option>
+        <option>Scholarships</option>
+        <option>Academic Publishing</option>
+        <option>Startups + Founders</option>
+        <option>Architecture + Urban</option>
+        <option>Agriculture + Food</option>
+        <option>Ethics + Philosophy</option>
+        <option>Debate + Languages</option>
+        <option>Gaming + Media</option>
+        <option>Vocational + Trades</option>
+        <option>Creative Writing</option>
+        <option>Olympiads + Competitions</option>
+        <option>Travel + Exchange</option>
+        <option>Psychology + Neuroscience</option>
+        <option>Math + Data</option>
+        <option>Case Competitions</option>
+      </select>
+      <select class="fsel" id="f-mode" onchange="render()">
+        <option value="">All modes</option>
+        <option>Online</option>
+        <option>In-person</option>
+        <option>Hybrid</option>
+      </select>
+      <select class="fsel" id="f-location" onchange="render()">
+        <option value="">All locations</option>
+        <option>Global / Remote</option>
+        <option>USA</option>
+        <option>UK</option>
+        <option>Europe</option>
+        <option>Asia</option>
+        <option>Africa</option>
+        <option>Multiple regions</option>
+      </select>
+    </div>
+    <div class="filter-row">
+      <select class="fsel" id="f-age" onchange="render()">
+        <option value="">All ages</option>
+        <option>13–17 (High school)</option>
+        <option>18–25 (Undergrad)</option>
+        <option>22–30 (Postgrad)</option>
+        <option>Any age</option>
+      </select>
+      <select class="fsel" id="f-elig" onchange="render()">
+        <option value="">All eligibility</option>
+        <option>Open to all</option>
+        <option>Students only</option>
+        <option>Graduates / Early career</option>
+        <option>Researchers</option>
+        <option>Entrepreneurs</option>
+      </select>
+      <select class="fsel" id="f-deadline" onchange="render()">
+        <option value="">All deadlines</option>
+        <option>Rolling / Ongoing</option>
+        <option>Summer cycle (Mar–May)</option>
+        <option>Fall cycle (Aug–Oct)</option>
+        <option>Winter cycle (Nov–Jan)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stats-count" id="stats-count">Showing <strong>130</strong> opportunities</div>
+    <div class="sort-label">Sort by:</div>
+    <div class="sort-tabs">
+      <button class="sort-tab active" onclick="setSort('name',this)">Name</button>
+      <button class="sort-tab" onclick="setSort('deadline',this)">Deadline</button>
+      <button class="sort-tab" onclick="setSort('interest',this)">Category</button>
+      <button class="sort-tab" onclick="setSort('location',this)">Location</button>
+    </div>
+  </div>
+
+  <div class="active-filters" id="active-filters"></div>
+
+  <div class="opp-grid" id="grid"></div>
+
+</main>
+
+<footer class="site-footer">
+  Generated from the Global Youth Opportunity List &nbsp;·&nbsp; Open the links to verify current deadlines and eligibility on each program's official website.
+</footer>
+
+<script>
+const DATA = [
+  {name:"SIREL Opportunities",url:"https://sirel.org",interest:"Social Impact + NGO",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Youth Atlas",url:"https://www.youthatlas.com",interest:"Social Impact + NGO",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Opportunity Desk",url:"https://www.opportunitydesk.org",interest:"Scholarships",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Youth Op",url:"https://www.youthop.com",interest:"Scholarships",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Scholarship Portal",url:"https://www.scholarshipportal.com",interest:"Scholarships",mode:"Online",location:"Europe",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Find a PhD",url:"https://www.findaphd.com",interest:"Academic Publishing",mode:"Online",location:"Multiple regions",age:"22–30 (Postgrad)",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Go Abroad",url:"https://www.goabroad.com",interest:"Travel + Exchange",mode:"In-person",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Go Overseas",url:"https://www.gooverseas.com",interest:"Travel + Exchange",mode:"In-person",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Idealist",url:"https://www.idealist.org",interest:"Social Impact + NGO",mode:"Hybrid",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Global Volunteers",url:"https://www.globalvolunteers.org",interest:"Social Impact + NGO",mode:"In-person",location:"Multiple regions",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"VolunteerMatch",url:"https://www.volunteermatch.org",interest:"Social Impact + NGO",mode:"Hybrid",location:"USA",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"UN Global Compact",url:"https://www.unglobalcompact.org",interest:"Law + Policy + IR",mode:"Hybrid",location:"Global / Remote",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"WHO Internship Programme",url:"https://www.who.int/careers/internship-programme",interest:"Medicine + Health",mode:"In-person",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"World Bank Internship",url:"https://www.worldbank.org/en/programs/internship-program",interest:"Business + Finance",mode:"In-person",location:"USA",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Amgen Scholars",url:"https://www.amgenscholars.com",interest:"STEM + Research",mode:"In-person",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"RIKEN Research Institute",url:"https://www.riken.jp/en",interest:"STEM + Research",mode:"In-person",location:"Asia",age:"22–30 (Postgrad)",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Summer Science Program (CEE)",url:"https://www.cee.org/programs/summer-science-program",interest:"STEM + Research",mode:"In-person",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"ISEE Foundation",url:"https://www.iseefoundation.org",interest:"STEM + Research",mode:"Hybrid",location:"USA",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Intel ISEF / Society for Science",url:"https://student.societyforscience.org/isef",interest:"STEM + Research",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Microsoft Imagine Cup",url:"https://www.microsoft.com/en-us/education/imagine-cup",interest:"Tech + AI",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"IBM SkillsBuild",url:"https://www.ibm.com/skills/build",interest:"Tech + AI",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"MIT Science Research",url:"https://mitadmissions.org/research/science-research",interest:"STEM + Research",mode:"In-person",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Earth Prize",url:"https://www.earthprize.org",interest:"Agriculture + Food",mode:"Hybrid",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Weizmann Institute",url:"https://www.weizmann.ac.il",interest:"STEM + Research",mode:"In-person",location:"Asia",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"ETH Zurich",url:"https://www.ethz.ch/en.html",interest:"STEM + Research",mode:"In-person",location:"Europe",age:"22–30 (Postgrad)",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Hult Prize",url:"https://www.hultprize.org",interest:"Business + Finance",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Junior Achievement (JA)",url:"https://www.ja.org",interest:"Business + Finance",mode:"Hybrid",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Youth Business International",url:"https://www.youthbusiness.org",interest:"Startups + Founders",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Entrepreneurs",deadline:"Rolling / Ongoing"},
+  {name:"EY Young Leaders",url:"https://www.ey.com/en_gl/ey-young-leaders",interest:"Business + Finance",mode:"In-person",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"G20 Youth (Y20)",url:"https://www.g20.org/youth",interest:"Law + Policy + IR",mode:"In-person",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"OECD Careers",url:"https://www.oecd.org/careers",interest:"Law + Policy + IR",mode:"In-person",location:"Europe",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"IMF Recruitment",url:"https://www.imf.org/en/About/Recruitment",interest:"Business + Finance",mode:"In-person",location:"USA",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"World Bank Youth",url:"https://www.worldbank.org/en/programs/youth",interest:"Law + Policy + IR",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"World Economic Forum",url:"https://www.weforum.org",interest:"Business + Finance",mode:"In-person",location:"Europe",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"UN Youth Envoy",url:"https://www.un.org/youthenvoy",interest:"Law + Policy + IR",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"UNICEF Youth",url:"https://www.unicef.org/youth",interest:"Social Impact + NGO",mode:"Hybrid",location:"Global / Remote",age:"13–17 (High school)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"UNESCO Youth",url:"https://www.unesco.org/en/youth",interest:"Law + Policy + IR",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"ICRC Youth Action",url:"https://www.icrc.org/en/youth-action",interest:"Law + Policy + IR",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Amnesty Youth",url:"https://www.amnesty.org/en/get-involved/youth",interest:"Law + Policy + IR",mode:"Online",location:"Global / Remote",age:"13–17 (High school)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Human Rights Watch",url:"https://www.hrw.org/get-involved",interest:"Law + Policy + IR",mode:"Hybrid",location:"Multiple regions",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"EU Youth Portal",url:"https://www.europa.eu/youth",interest:"Law + Policy + IR",mode:"Hybrid",location:"Europe",age:"13–17 (High school)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Behance",url:"https://www.behance.net",interest:"Arts + Design",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Dribbble",url:"https://www.dribbble.com",interest:"Arts + Design",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"PEN International",url:"https://www.pen.org",interest:"Creative Writing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"WHO Careers",url:"https://www.who.int/careers",interest:"Medicine + Health",mode:"In-person",location:"Global / Remote",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"Red Cross Volunteer",url:"https://www.redcross.org/volunteer",interest:"Medicine + Health",mode:"In-person",location:"Multiple regions",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Khan Academy Health & Medicine",url:"https://www.khanacademy.org/science/health-and-medicine",interest:"Medicine + Health",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"HackerEarth Challenges",url:"https://www.hackerearth.com/challenges",interest:"Tech + AI",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Hackathon.com",url:"https://www.hackathon.com",interest:"Tech + AI",mode:"Hybrid",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Devpost",url:"https://www.devpost.com",interest:"Tech + AI",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Kaggle Competitions",url:"https://www.kaggle.com/competitions",interest:"Math + Data",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"GitHub Explore",url:"https://www.github.com/explore",interest:"Tech + AI",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Google Student Programs",url:"https://www.google.com/about/careers/applications/students",interest:"Tech + AI",mode:"In-person",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Meta Student Programs",url:"https://www.meta.com/careers/students",interest:"Tech + AI",mode:"In-person",location:"USA",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Microsoft Education",url:"https://www.microsoft.com/en-us/education",interest:"Tech + AI",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Amazon Student Programs",url:"https://www.amazon.jobs/en/landing_pages/student-programs",interest:"Tech + AI",mode:"In-person",location:"USA",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"UNV Online Volunteering",url:"https://www.unv.org",interest:"Social Impact + NGO",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Volunteer World",url:"https://www.volunteerworld.com",interest:"Social Impact + NGO",mode:"In-person",location:"Multiple regions",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Doctors Without Borders",url:"https://www.doctorswithoutborders.org/volunteer",interest:"Medicine + Health",mode:"In-person",location:"Multiple regions",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"Greenpeace",url:"https://www.greenpeace.org/international/act",interest:"Social Impact + NGO",mode:"Hybrid",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"WWF",url:"https://www.wwf.org",interest:"Agriculture + Food",mode:"Hybrid",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"TED Fellows Program",url:"https://www.ted.com/participate/ted-fellows-program",interest:"Social Impact + NGO",mode:"Hybrid",location:"Global / Remote",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Change.org",url:"https://www.change.org",interest:"Social Impact + NGO",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Rhodes Scholarship",url:"https://www.rhodeshouse.ox.ac.uk",interest:"Scholarships",mode:"In-person",location:"UK",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Gates Cambridge Scholarship",url:"https://www.gatescambridge.org",interest:"Scholarships",mode:"In-person",location:"UK",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Schwarzman Scholars",url:"https://www.schwarzmanscholars.org",interest:"Scholarships",mode:"In-person",location:"Asia",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Yenching Academy",url:"https://www.yenchingacademy.pku.edu.cn",interest:"Scholarships",mode:"In-person",location:"Asia",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Nature",url:"https://www.nature.com",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Science.org",url:"https://www.science.org",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"JSTOR",url:"https://www.jstor.org",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"ResearchGate",url:"https://www.researchgate.net",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"arXiv",url:"https://arxiv.org",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"PNAS",url:"https://www.pnas.org",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Frontiers in Science",url:"https://www.frontiersin.org",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"PubMed",url:"https://pubmed.ncbi.nlm.nih.gov",interest:"Academic Publishing",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Y Combinator",url:"https://www.ycombinator.com",interest:"Startups + Founders",mode:"In-person",location:"USA",age:"18–25 (Undergrad)",elig:"Entrepreneurs",deadline:"Rolling / Ongoing"},
+  {name:"Techstars",url:"https://www.techstars.com",interest:"Startups + Founders",mode:"Hybrid",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Entrepreneurs",deadline:"Rolling / Ongoing"},
+  {name:"F6S",url:"https://www.f6s.com",interest:"Startups + Founders",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Entrepreneurs",deadline:"Rolling / Ongoing"},
+  {name:"MassChallenge",url:"https://www.masschallenge.org",interest:"Startups + Founders",mode:"Hybrid",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Entrepreneurs",deadline:"Summer cycle (Mar–May)"},
+  {name:"Seedcamp",url:"https://www.seedcamp.com",interest:"Startups + Founders",mode:"In-person",location:"Europe",age:"18–25 (Undergrad)",elig:"Entrepreneurs",deadline:"Rolling / Ongoing"},
+  {name:"Antler",url:"https://www.antler.co",interest:"Startups + Founders",mode:"In-person",location:"Multiple regions",age:"22–30 (Postgrad)",elig:"Entrepreneurs",deadline:"Rolling / Ongoing"},
+  {name:"Inspireli Awards",url:"https://www.inspireli.com",interest:"Architecture + Urban",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"IF Design Talent Award",url:"https://ifdesign.com/en/if-design-talent-award",interest:"Architecture + Urban",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Lexus Design Award",url:"https://discoverlexus.com/stories/lexus-design-award",interest:"Arts + Design",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"RIBA Student Awards",url:"https://www.architecture.com/awards-and-competitions-landing-page/student-awards",interest:"Architecture + Urban",mode:"In-person",location:"UK",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"World Architecture Festival",url:"https://www.worldarchitecturefestival.com",interest:"Architecture + Urban",mode:"In-person",location:"Europe",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Summer cycle (Mar–May)"},
+  {name:"Evolo Skyscraper Competition",url:"https://www.evolo.us/category/competition",interest:"Architecture + Urban",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Young Architects Competitions",url:"https://www.youngarchitectscompetitions.com",interest:"Architecture + Urban",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Thought For Food",url:"https://thoughtforfood.org",interest:"Agriculture + Food",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"World Food Prize",url:"https://www.worldfoodprize.org",interest:"Agriculture + Food",mode:"In-person",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"GoGetTaz Africa",url:"https://gogettaz.africa",interest:"Agriculture + Food",mode:"Hybrid",location:"Africa",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"FAO Youth",url:"https://www.fao.org/youth/en",interest:"Agriculture + Food",mode:"Hybrid",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"CGIAR",url:"https://www.cgiar.org",interest:"Agriculture + Food",mode:"Hybrid",location:"Multiple regions",age:"22–30 (Postgrad)",elig:"Researchers",deadline:"Rolling / Ongoing"},
+  {name:"Slow Food Youth Network",url:"https://www.slowfood.com/our-network/slow-food-youth-network",interest:"Agriculture + Food",mode:"Hybrid",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Young Professionals in Ag",url:"https://www.youngprofessionals.ag",interest:"Agriculture + Food",mode:"Online",location:"Global / Remote",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"John Locke Institute Essays",url:"https://www.johnlockeinstitute.com",interest:"Ethics + Philosophy",mode:"Online",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"International Philosophy Olympiad",url:"https://www.philosophy-olympiad.org",interest:"Ethics + Philosophy",mode:"In-person",location:"Europe",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Global Dialogues",url:"https://globaldialogues.org",interest:"Ethics + Philosophy",mode:"Online",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Oxford Essay Competitions",url:"https://www.ox.ac.uk/admissions/undergraduate/increasing-access/outreach-events/essay-competitions",interest:"Ethics + Philosophy",mode:"Online",location:"UK",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Chicago Council Essay",url:"https://www.thechicagocouncil.org",interest:"Law + Policy + IR",mode:"Online",location:"USA",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"WSDC Debating",url:"https://wsdcdebating.org",interest:"Debate + Languages",mode:"In-person",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"English Speaking Union (ESU)",url:"https://www.esu.org/competitions/ipsc",interest:"Debate + Languages",mode:"In-person",location:"UK",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"World Debate (WUDC)",url:"https://www.worlddebate.org",interest:"Debate + Languages",mode:"In-person",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Rotary Interact Clubs",url:"https://www.rotary.org/en/get-involved/interact-clubs",interest:"Social Impact + NGO",mode:"Hybrid",location:"Multiple regions",age:"13–17 (High school)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Goethe German Language",url:"https://www.goethe.de/en/spr/unt/ver/idw.html",interest:"Debate + Languages",mode:"Hybrid",location:"Europe",age:"13–17 (High school)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"DELF/DALF French Language",url:"https://www.ciep.fr/en/delf-dalf",interest:"Debate + Languages",mode:"In-person",location:"Multiple regions",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Global Game Jam",url:"https://globalgamejam.org",interest:"Gaming + Media",mode:"Hybrid",location:"Multiple regions",age:"Any age",elig:"Open to all",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Games for Change",url:"https://www.gamesforchange.org/studentchallenge",interest:"Gaming + Media",mode:"Online",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Unity Education",url:"https://unity.com/education",interest:"Gaming + Media",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Unreal Student Showcase",url:"https://www.unrealengine.com/en-US/student-showcase",interest:"Gaming + Media",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"WorldSkills",url:"https://worldskills.org",interest:"Vocational + Trades",mode:"In-person",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"SkillsUSA",url:"https://www.skillsusa.org",interest:"Vocational + Trades",mode:"In-person",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"EuroSkills",url:"https://www.euskills.org",interest:"Vocational + Trades",mode:"In-person",location:"Europe",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Bennington Young Writers Awards",url:"https://www.bennington.edu/events/young-writers-awards",interest:"Creative Writing",mode:"Online",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Ayn Rand Essay Contests",url:"https://aynrand.org/students/essay-contests",interest:"Creative Writing",mode:"Online",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"World Historian Student Essay",url:"https://www.thewha.org/awards/world-historian-student-essay-competition",interest:"Creative Writing",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Kenyon Review Patricia Grodd",url:"https://www.kenyonreview.org/contests/patricia-grodd",interest:"Creative Writing",mode:"Online",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"The Concord Review",url:"https://tcr.org",interest:"Creative Writing",mode:"Online",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Stephen Spender Prize",url:"https://www.stephen-spender-trust.org.uk",interest:"Creative Writing",mode:"Online",location:"UK",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Foyle Young Poets Award",url:"https://www.poetrysociety.org.uk/competitions/foyle-young-poets-of-the-year-award",interest:"Creative Writing",mode:"Online",location:"UK",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Genius Olympiad",url:"https://geniusolympiad.org",interest:"Olympiads + Competitions",mode:"In-person",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"Conrad Challenge",url:"https://www.conradchallenge.org",interest:"Olympiads + Competitions",mode:"Hybrid",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Breakthrough Junior Challenge",url:"https://breakthroughjuniorchallenge.org",interest:"Olympiads + Competitions",mode:"Online",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Summer cycle (Mar–May)"},
+  {name:"Polygence Symposium",url:"https://www.polygence.org/symposium",interest:"STEM + Research",mode:"Online",location:"Global / Remote",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Future City Competition",url:"https://www.futurecity.org",interest:"Architecture + Urban",mode:"In-person",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"World Scholar's Cup",url:"https://www.worldscholars-cup.org",interest:"Olympiads + Competitions",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Destination Imagination",url:"https://www.destinationimagination.org",interest:"Olympiads + Competitions",mode:"Hybrid",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"AFS Intercultural Exchange",url:"https://www.afs.org",interest:"Travel + Exchange",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"YFU Youth Exchange",url:"https://www.yfu.org",interest:"Travel + Exchange",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Rotary Youth Exchange",url:"https://www.rotary.org/en/our-programs/youth-exchanges",interest:"Travel + Exchange",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"Experiment in International Living",url:"https://www.experiment.org",interest:"Travel + Exchange",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"CISV International",url:"https://www.cisv.org",interest:"Travel + Exchange",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"Workaway",url:"https://www.workaway.info",interest:"Travel + Exchange",mode:"In-person",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"WWOOF Organic Farming",url:"https://www.wwoof.net",interest:"Agriculture + Food",mode:"In-person",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"International Brain Bee",url:"https://www.neuroscienceolympiad.org",interest:"Psychology + Neuroscience",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"APS Student Programs",url:"https://www.psychologicalscience.org/members/student-programs",interest:"Psychology + Neuroscience",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"APA Awards",url:"https://www.apa.org/about/awards",interest:"Psychology + Neuroscience",mode:"Online",location:"USA",age:"22–30 (Postgrad)",elig:"Graduates / Early career",deadline:"Rolling / Ongoing"},
+  {name:"MHA Youth Mental Health Academy",url:"https://www.mhanational.org/youth-mental-health-academy",interest:"Psychology + Neuroscience",mode:"Online",location:"USA",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"International Math Olympiad (IMO)",url:"https://www.imo-official.org",interest:"Math + Data",mode:"In-person",location:"Multiple regions",age:"13–17 (High school)",elig:"Students only",deadline:"Rolling / Ongoing"},
+  {name:"World Maths Day",url:"https://www.worldmathsday.com",interest:"Math + Data",mode:"Online",location:"Global / Remote",age:"Any age",elig:"Open to all",deadline:"Rolling / Ongoing"},
+  {name:"L'Oréal Brandstorm",url:"https://brandstorm.loreal.com",interest:"Case Competitions",mode:"Hybrid",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Winter cycle (Nov–Jan)"},
+  {name:"PwC Challenge",url:"https://www.pwc.com/gx/en/careers/challenge.html",interest:"Case Competitions",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"KPMG Ideation Challenge",url:"https://www.kpmg.com/xx/en/home/careers/graduates/kpmg-ideation-challenge.html",interest:"Case Competitions",mode:"Online",location:"Global / Remote",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+  {name:"Deloitte Global Case Competition",url:"https://www.deloitte.com/global/en/pages/about-deloitte/articles/global-case-competition.html",interest:"Case Competitions",mode:"Hybrid",location:"Multiple regions",age:"18–25 (Undergrad)",elig:"Students only",deadline:"Fall cycle (Aug–Oct)"},
+];
+
+const deadlineOrder = {
+  "Summer cycle (Mar–May)": 1,
+  "Fall cycle (Aug–Oct)": 2,
+  "Winter cycle (Nov–Jan)": 3,
+  "Rolling / Ongoing": 4,
+};
+
+let sortKey = 'name';
+document.getElementById('total-count').textContent = DATA.length;
+
+function resetFilters() {
+  document.getElementById('search').value = '';
+  ['f-interest','f-mode','f-location','f-age','f-elig','f-deadline'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  render();
+}
+
+function setSort(key, btn) {
+  sortKey = key;
+  document.querySelectorAll('.sort-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const fi = document.getElementById('f-interest').value;
+  const fm = document.getElementById('f-mode').value;
+  const fl = document.getElementById('f-location').value;
+  const fa = document.getElementById('f-age').value;
+  const fe = document.getElementById('f-elig').value;
+  const fd = document.getElementById('f-deadline').value;
+
+  let filtered = DATA.filter(d => {
+    if (q && !d.name.toLowerCase().includes(q) && !d.url.toLowerCase().includes(q) && !d.interest.toLowerCase().includes(q)) return false;
+    if (fi && d.interest !== fi) return false;
+    if (fm && d.mode !== fm) return false;
+    if (fl && d.location !== fl) return false;
+    if (fa && d.age !== fa) return false;
+    if (fe && d.elig !== fe) return false;
+    if (fd && d.deadline !== fd) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortKey === 'deadline') return (deadlineOrder[a.deadline] || 9) - (deadlineOrder[b.deadline] || 9);
+    return a[sortKey].localeCompare(b[sortKey]);
+  });
+
+  // Active filter chips
+  const chips = [];
+  if (fi) chips.push({label: fi, id: 'f-interest'});
+  if (fm) chips.push({label: fm, id: 'f-mode'});
+  if (fl) chips.push({label: fl, id: 'f-location'});
+  if (fa) chips.push({label: fa, id: 'f-age'});
+  if (fe) chips.push({label: fe, id: 'f-elig'});
+  if (fd) chips.push({label: fd, id: 'f-deadline'});
+  const af = document.getElementById('active-filters');
+  af.innerHTML = chips.map(c =>
+    `<span class="active-chip" onclick="document.getElementById('${c.id}').value='';render()">
+      ${c.label} <span class="x">×</span>
+    </span>`
+  ).join('');
+
+  document.getElementById('stats-count').innerHTML =
+    `Showing <strong>${filtered.length}</strong> of <strong>${DATA.length}</strong> opportunities`;
+
+  const grid = document.getElementById('grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty">
+      <div class="empty-icon">○</div>
+      <h3>No results found</h3>
+      <p>Try adjusting your filters or search terms.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((d, i) => `
+    <a class="opp-card" href="${d.url}" target="_blank" rel="noopener" style="animation-delay:${Math.min(i*20,400)}ms">
+      <div class="card-top">
+        <div class="card-name">${d.name}</div>
+        <div class="card-arrow">↗</div>
+      </div>
+      <div class="card-url">${d.url.replace('https://','').replace('http://','')}</div>
+      <div class="tag-row">
+        <span class="tag ti">${d.interest}</span>
+        <span class="tag tm">${d.mode}</span>
+      </div>
+      <div class="tag-row">
+        <span class="tag tl">${d.location}</span>
+        <span class="tag ta">${d.age}</span>
+      </div>
+      <div class="tag-row">
+        <span class="tag te">${d.elig}</span>
+        <span class="tag td">${d.deadline}</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+render();
+</script>
+</body>
+</html>
